@@ -1,0 +1,40 @@
+# Nemotron-3 Nano tiny pretrain: 7-layer hybrid (Mamba + MoE + Attention).
+# Used by: scaletune/run_with_salloc.sh --framework megatron-bridge --model-size tiny
+#
+# Pattern "MEME*ME" -> 7 layers (2x Mamba, 1x Attention, 2x MoE in hybrid stack).
+# Mock dataset is used unless you pass --per-split-data-args-path on the CLI.
+
+model:
+  hybrid_layer_pattern: "MEME*ME"
+  num_layers: 7
+  seq_length: 512
+  tensor_model_parallel_size: 1
+  pipeline_model_parallel_size: 1
+  expert_model_parallel_size: 4
+  expert_tensor_parallel_size: 1
+  context_parallel_size: 1
+  sequence_parallel: false
+  num_moe_experts: 16
+  moe_router_topk: 4
+  # Use alltoall for small-scale runs (avoids DeepEP setup on minimal clusters).
+  moe_token_dispatcher_type: alltoall
+  moe_flex_dispatcher_backend: null
+  moe_shared_expert_overlap: true
+
+train:
+  train_iters: 50
+  global_batch_size: 32
+  micro_batch_size: 1
+  eval_iters: 5
+
+dataset:
+  seq_length: 512
+
+scheduler:
+  lr_warmup_iters: 5
+
+logger:
+  log_interval: 1
+
+checkpoint:
+  save_interval: 1000
